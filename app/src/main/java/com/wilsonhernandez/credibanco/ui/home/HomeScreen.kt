@@ -36,7 +36,12 @@ import androidx.compose.ui.unit.sp
 import com.wilsonhernandez.credibanco.ui.theme.Purple40
 
 @Composable
-fun Home() {
+fun HomeScreen(
+    onClickButtonAuthorization: () -> Unit,
+    onClickButtonSearch: () -> Unit,
+    onClickButtonList: () -> Unit,
+    onClickButtonCancel: () -> Unit
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         BankInformation()
         Spacer(modifier = Modifier.height(20.dp))
@@ -46,8 +51,8 @@ fun Home() {
                 .padding(10.dp),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            ButtonAction(title = "Autorización de transacciones", icon = Icons.Outlined.Add, {})
-            ButtonAction(title = "Buscar transacciones", icon = Icons.Outlined.Search, {})
+            ButtonAction(title = "Autorización de transacciones", icon = Icons.Outlined.Add, onClickButtonAuthorization)
+            ButtonAction(title = "Buscar transacciones", icon = Icons.Outlined.Search, onClickButtonSearch)
 
         }
         Spacer(modifier = Modifier.padding(bottom = 30.dp))
@@ -57,8 +62,8 @@ fun Home() {
                 .padding(10.dp),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            ButtonAction(title = "Lista de transacciones", icon = Icons.Outlined.List, {})
-            ButtonAction(title = "Anular transacciones", icon = Icons.Outlined.Close, {})
+            ButtonAction(title = "Lista de transacciones", icon = Icons.Outlined.List,onClickButtonList)
+            ButtonAction(title = "Anular transacciones", icon = Icons.Outlined.Close, onClickButtonCancel)
 
         }
     }
@@ -67,8 +72,12 @@ fun Home() {
 
 @Preview
 @Composable
-fun HomePreview() {
-    Home()
+fun HomeScreenPreview() {
+    HomeScreen(
+        onClickButtonAuthorization = {},
+        onClickButtonSearch = {},
+        onClickButtonList = {},
+        onClickButtonCancel = {})
 }
 
 @Composable
@@ -175,14 +184,14 @@ fun ButtonActionPreview() {
 }
 
 @Composable
-fun ListOfLastTransactions(){
-    LazyColumn(){
+fun ListOfLastTransactions() {
+    LazyColumn() {
 
     }
 }
 
 @Preview
 @Composable
-fun ListOfLastTransactionsPreview(){
+fun ListOfLastTransactionsPreview() {
     ListOfLastTransactions()
 }
