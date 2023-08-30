@@ -41,7 +41,9 @@ class MainActivity : ComponentActivity() {
                                 onClickButtonCancel = {navController.navigate("cancel")})
                         }
                         composable("authorization"){
-                            AuthorizationScreen()
+                            AuthorizationScreen {
+                                navController.popBackStack()
+                            }
                         }
                         composable("search"){
                             SearchScreen()
