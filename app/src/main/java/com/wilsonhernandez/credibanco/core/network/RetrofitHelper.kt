@@ -15,7 +15,7 @@ object RetrofitHelper {
     }
 
     fun getRetrofit(): Retrofit {
-        return Retrofit.Builder().baseUrl("http://192.168.101.87:8080/api/payments/")
+        return Retrofit.Builder().baseUrl("http://localhost:8080/api/payments/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create()).build()
     }

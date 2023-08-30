@@ -1,4 +1,4 @@
-package com.wilsonhernandez.credibanco.ui.home
+package com.wilsonhernandez.credibanco.home.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +24,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,17 +35,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.wilsonhernandez.credibanco.core.room.AuthorizationDao
 import com.wilsonhernandez.credibanco.ui.theme.Purple40
 
 @Composable
 fun HomeScreen(
+    dao: AuthorizationDao?,
     onClickButtonAuthorization: () -> Unit,
     onClickButtonSearch: () -> Unit,
     onClickButtonList: () -> Unit,
     onClickButtonCancel: () -> Unit
 ) {
+    val viewModel = HomeViewModel(dao!!)
+    val count: String by viewModel.countAuthorization.observeAsState(initial = "")
     Column(modifier = Modifier.fillMaxWidth()) {
-        BankInformation()
+        BankInformation(count)
         Spacer(modifier = Modifier.height(20.dp))
         Row(
             modifier = Modifier
@@ -52,7 +58,7 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             ButtonAction(title = "Autorización de transacciones", icon = Icons.Outlined.Add, onClickButtonAuthorization)
-            ButtonAction(title = "Buscar transacciones", icon = Icons.Outlined.Search, onClickButtonSearch)
+            ButtonAction(title = "Buscar transacciones", icon = Icons.Outlined.Search, {})
 
         }
         Spacer(modifier = Modifier.padding(bottom = 30.dp))
@@ -74,6 +80,7 @@ fun HomeScreen(
 @Composable
 fun HomeScreenPreview() {
     HomeScreen(
+        null,
         onClickButtonAuthorization = {},
         onClickButtonSearch = {},
         onClickButtonList = {},
@@ -81,7 +88,7 @@ fun HomeScreenPreview() {
 }
 
 @Composable
-fun BankInformation() {
+fun BankInformation(count:String) {
     Card(
         shape = RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp),
     ) {
@@ -102,20 +109,7 @@ fun BankInformation() {
             Spacer(modifier = Modifier.height(10.dp))
             Text(text = "Wilson Hernandez ", fontFamily = FontFamily.SansSerif, color = Color.White)
             Spacer(modifier = Modifier.height(10.dp))
-            Row {
-                Text(
-                    text = "Total de transaciones    ",
-                    fontFamily = FontFamily.SansSerif,
-                    color = Color.White,
-                    modifier = Modifier.padding(top = 5.dp)
-                )
-                Text(
-                    text = "0",
-                    fontFamily = FontFamily.SansSerif,
-                    color = Color.White,
-                    fontSize = 24.sp
-                )
-            }
+
 
             Box(
                 modifier = Modifier
@@ -135,7 +129,7 @@ fun BankInformation() {
 @Preview
 @Composable
 fun BankInformationPreview() {
-    BankInformation()
+    BankInformation("0")
 }
 
 @Composable

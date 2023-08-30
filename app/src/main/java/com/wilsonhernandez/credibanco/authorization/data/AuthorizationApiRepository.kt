@@ -5,7 +5,7 @@ import androidx.annotation.RequiresApi
 import com.wilsonhernandez.credibanco.authorization.data.network.AuthorizationService
 import com.wilsonhernandez.credibanco.authorization.data.network.response.AuthorizationResponse
 
-class AuthorizationRepository {
+class AuthorizationApiRepository {
    private val api = AuthorizationService()
 
     @RequiresApi(Build.VERSION_CODES.O)

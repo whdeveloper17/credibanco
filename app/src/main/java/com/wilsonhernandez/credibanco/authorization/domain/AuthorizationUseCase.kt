@@ -2,11 +2,11 @@ package com.wilsonhernandez.credibanco.authorization.domain
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.wilsonhernandez.credibanco.authorization.data.AuthorizationRepository
+import com.wilsonhernandez.credibanco.authorization.data.AuthorizationApiRepository
 import com.wilsonhernandez.credibanco.authorization.data.network.response.AuthorizationResponse
 
 class AuthorizationUseCase {
-    val repository = AuthorizationRepository()
+    val repository = AuthorizationApiRepository()
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend operator fun invoke(

@@ -1,15 +1,19 @@
 package com.wilsonhernandez.credibanco.authorization.ui
 
+import android.content.Context
 import android.os.Build
+import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wilsonhernandez.credibanco.authorization.domain.AuthorizationUseCase
+import com.wilsonhernandez.credibanco.core.room.AuthorizationDao
+import com.wilsonhernandez.credibanco.core.room.entity.AuthorizationEntity
 import kotlinx.coroutines.launch
 
-class AuthorizationViewModel : ViewModel() {
+class AuthorizationViewModel(val dao: AuthorizationDao) : ViewModel() {
 
     private val _id = MutableLiveData<String>()
     val id: LiveData<String> = _id
@@ -39,6 +43,9 @@ class AuthorizationViewModel : ViewModel() {
     val succesAuthorization: LiveData<Boolean> = _succesAuthorization
     val authorizationUseCase = AuthorizationUseCase()
 
+    init {
+        getInstallationId()
+    }
 
     fun onAuthorizationChanged(
         id: String,
@@ -81,7 +88,11 @@ class AuthorizationViewModel : ViewModel() {
                     _isLoading.postValue(false)
 
                     if (it.statusCode == "00"){
+                        val authorizationEntity = AuthorizationEntity(receiptId = it.receiptId, rrn = it.rrn, statusCode = it.statusCode,commerceCode = _commerceCode.value!!,terminalCode= _terminalCode.value!!, statusDescription = it.statusDescription)
                         clearFields()
+                        viewModelScope.launch {
+                            dao.insertTransaction(authorizationEntity)
+                        }
                         _isAuthorizationEnable.postValue(false)
                         _succesAuthorization.postValue(true)
                     }else{
@@ -112,6 +123,10 @@ class AuthorizationViewModel : ViewModel() {
         _terminalCode.postValue("")
         _amount.postValue("")
         _card.postValue("")
+    }
+
+    fun getInstallationId() {
+       // _id.postValue(Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID))
     }
 
 }

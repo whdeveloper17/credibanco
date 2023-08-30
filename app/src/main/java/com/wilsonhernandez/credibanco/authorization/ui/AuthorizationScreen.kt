@@ -56,6 +56,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.wilsonhernandez.credibanco.R
 import com.wilsonhernandez.credibanco.authorization.ui.AuthorizationViewModel
+import com.wilsonhernandez.credibanco.core.room.AuthorizationDao
 import com.wilsonhernandez.credibanco.ui.theme.Purple40
 import com.wilsonhernandez.credibanco.ui.theme.Purple80
 import com.wilsonhernandez.credibanco.ui.util.insertDecimal
@@ -66,9 +67,9 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AuthorizationScreen(onclickButtonBack: () -> Unit) {
+fun AuthorizationScreen(dao: AuthorizationDao?, onclickButtonBack: () -> Unit) {
 
-    val viewModel = AuthorizationViewModel()
+    val viewModel = AuthorizationViewModel(dao!!)
     val snackbarHostSate = remember {
         SnackbarHostState()
     }
@@ -163,7 +164,7 @@ fun AuthorizationScreen(onclickButtonBack: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun AuthorizationScreenPreview() {
-    AuthorizationScreen({})
+    AuthorizationScreen(null,{})
 }
 
 
@@ -176,6 +177,7 @@ fun TextFieldUid(uid: String, onTextChanged: (String) -> Unit) {
         onValueChange = { onTextChanged.invoke(it) },
         label = { Text("UID") },
         maxLines = 1,
+        enabled = true,
         textStyle = TextStyle(color = Color.Black),
 
         leadingIcon = {
@@ -500,9 +502,7 @@ fun ButtonAction(enabled: Boolean, onClick: () -> Unit) {
 @Composable
 fun BlockingCircularProgress(isBlocking: Boolean) {
     if (isBlocking) {
-        val context = LocalContext.current
-        val coroutineScope = rememberCoroutineScope()
-        var isShowingDialog by remember { mutableStateOf(true) }
+      var isShowingDialog by remember { mutableStateOf(true) }
 
         DisposableEffect(isBlocking) {
             onDispose {
