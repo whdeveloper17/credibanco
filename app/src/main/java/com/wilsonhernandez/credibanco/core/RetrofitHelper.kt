@@ -21,8 +21,8 @@ object RetrofitHelper {
     }
 
     private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(interceptor) // same for .addInterceptor(...)
-        .connectTimeout(30, TimeUnit.SECONDS) //Backend is really slow
+        .addInterceptor(interceptor)
+        .connectTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .build()

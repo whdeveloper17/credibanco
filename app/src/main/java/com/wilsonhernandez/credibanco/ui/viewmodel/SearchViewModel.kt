@@ -9,12 +9,13 @@ import androidx.lifecycle.viewModelScope
 import com.wilsonhernandez.credibanco.data.database.entities.TransactionsEntity
 import com.wilsonhernandez.credibanco.data.repository.DatabaseRepository
 import com.wilsonhernandez.credibanco.domain.CancelUseCase
+import com.wilsonhernandez.credibanco.util.NetworkConnectivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(private val databaseRepository: DatabaseRepository,private val cancelUseCase: CancelUseCase):ViewModel() {
+class SearchViewModel @Inject constructor(private val databaseRepository: DatabaseRepository,private val cancelUseCase: CancelUseCase,private val networkConnectivity: NetworkConnectivity):ViewModel() {
     private val _listTransaction = MutableLiveData<List<TransactionsEntity>>()
     val listTransaction: LiveData<List<TransactionsEntity>> = _listTransaction
 
@@ -25,6 +26,9 @@ class SearchViewModel @Inject constructor(private val databaseRepository: Databa
 
     private val _isSnackbar = MutableLiveData<String>()
     val isSnackbar: LiveData<String> = _isSnackbar
+
+    private val _alertInternet = MutableLiveData<Boolean>()
+    val alertInternet: LiveData<Boolean> = _alertInternet
     fun  getList(){
         viewModelScope.launch {
             val list= databaseRepository.getListTransactions()
@@ -41,7 +45,10 @@ class SearchViewModel @Inject constructor(private val databaseRepository: Databa
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun onCancelAuthorization(item: TransactionsEntity) {
-
+        if (!networkConnectivity.checkNetworkConnectivity()){
+            _alertInternet.postValue(true)
+            return
+        }
         viewModelScope.launch {
             cancelUseCase(
                 item.receiptId,
@@ -71,5 +78,9 @@ class SearchViewModel @Inject constructor(private val databaseRepository: Databa
 
     fun clearSnackbar() {
         _isSnackbar.postValue(null)
+    }
+
+    fun enableAlertInternet(){
+        _alertInternet.postValue(false)
     }
 }

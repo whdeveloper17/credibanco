@@ -2,11 +2,11 @@ package com.wilsonhernandez.credibanco.ui.viewmodel
 
 import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.wilsonhernandez.credibanco.data.database.entities.TransactionsEntity
 import com.wilsonhernandez.credibanco.data.network.response.AuthorizationResponse
 import com.wilsonhernandez.credibanco.data.repository.DatabaseRepository
 import com.wilsonhernandez.credibanco.domain.AuthorizationUseCase
 import com.wilsonhernandez.credibanco.settings.SettingsUtilImpl
+import com.wilsonhernandez.credibanco.util.NetworkConnectivity
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.impl.annotations.RelaxedMockK
@@ -16,8 +16,6 @@ import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -41,6 +39,8 @@ class AuthorizationViewModelUnitTest {
 
     @RelaxedMockK
     private lateinit var settingsUtilImpl: SettingsUtilImpl
+    @RelaxedMockK
+    private lateinit var networkConnectivity: NetworkConnectivity
 
     @get:Rule
     var rule: InstantTaskExecutorRule = InstantTaskExecutorRule()
@@ -54,7 +54,8 @@ class AuthorizationViewModelUnitTest {
                 context,
                 databaseRepository,
                 getAuthorizationUseCase,
-                settingsUtilImpl
+                settingsUtilImpl,
+                networkConnectivity
             )
         Dispatchers.setMain(Dispatchers.Unconfined)
     }
@@ -113,7 +114,7 @@ class AuthorizationViewModelUnitTest {
 
     @Test
     fun `when authorization is successful, it should update state correctly`() = runTest {
-
+        coEvery { networkConnectivity.checkNetworkConnectivity() } returns true
         coEvery {
             getAuthorizationUseCase(
                 any(),
@@ -145,6 +146,7 @@ class AuthorizationViewModelUnitTest {
 
     @Test
     fun `when authorization fails, it should update state correctly`() = runTest {
+        coEvery { networkConnectivity.checkNetworkConnectivity() } returns true
 
         coEvery {
             getAuthorizationUseCase(

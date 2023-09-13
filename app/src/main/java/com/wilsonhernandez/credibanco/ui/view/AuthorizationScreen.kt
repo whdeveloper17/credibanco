@@ -58,6 +58,7 @@ import com.wilsonhernandez.credibanco.R
 import com.wilsonhernandez.credibanco.ui.viewmodel.AuthorizationViewModel
 import com.wilsonhernandez.credibanco.theme.Purple40
 import com.wilsonhernandez.credibanco.theme.Purple80
+import com.wilsonhernandez.credibanco.util.AlertDialogInternet
 import com.wilsonhernandez.credibanco.util.insertDecimal
 import kotlinx.coroutines.launch
 
@@ -80,6 +81,8 @@ fun AuthorizationScreen(viewModel: AuthorizationViewModel, onclickButtonBack: ()
     val enable: Boolean by viewModel.isAuthorizationEnable.observeAsState(initial = false)
     val success: Boolean by viewModel.succesAuthorization.observeAsState(initial = false)
     val snackbar: String by viewModel.isSnackbar.observeAsState(initial = "")
+    val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
+    val alertInternet: Boolean by viewModel.alertInternet.observeAsState(initial = false)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = {
@@ -142,8 +145,13 @@ fun AuthorizationScreen(viewModel: AuthorizationViewModel, onclickButtonBack: ()
                 )
             }
 
-            val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
+
             BlockingCircularProgress(isLoading)
+            if (alertInternet){
+                AlertDialogInternet {
+                    viewModel.enableAlertInternet()
+                }
+            }
 
             if (!snackbar.isNullOrEmpty()) {
                 scope.launch {
@@ -528,7 +536,7 @@ fun BlockingCircularProgress(isBlocking: Boolean) {
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
+                    contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(50.dp),

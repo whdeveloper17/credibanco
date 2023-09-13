@@ -2,17 +2,16 @@ package com.wilsonhernandez.credibanco.ui.viewmodel
 
 import android.content.Context
 import android.os.Build
-import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wilsonhernandez.credibanco.domain.AuthorizationUseCase
-import com.wilsonhernandez.credibanco.data.database.dao.CrediBancoDao
 import com.wilsonhernandez.credibanco.data.database.entities.TransactionsEntity
 import com.wilsonhernandez.credibanco.data.repository.DatabaseRepository
 import com.wilsonhernandez.credibanco.settings.SettingsUtil
+import com.wilsonhernandez.credibanco.util.NetworkConnectivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,10 +19,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthorizationViewModel @Inject constructor(
-    val context: Context,
+    val  context: Context,
     val databaseRepository: DatabaseRepository,
     val authorizationUseCase: AuthorizationUseCase,
-    val settingsUtil: SettingsUtil
+    val settingsUtil: SettingsUtil,
+    val networkConnectivity: NetworkConnectivity
 ) : ViewModel() {
 
     private val _id = MutableLiveData<String>()
@@ -52,6 +52,10 @@ class AuthorizationViewModel @Inject constructor(
 
     private val _succesAuthorization = MutableLiveData<Boolean>()
     val succesAuthorization: LiveData<Boolean> = _succesAuthorization
+
+    private val _alertInternet = MutableLiveData<Boolean>()
+    val alertInternet: LiveData<Boolean> = _alertInternet
+
 
     init {
         getInstallationId()
@@ -86,6 +90,10 @@ class AuthorizationViewModel @Inject constructor(
         amount: String,
         card: String
     ) {
+        if (!networkConnectivity.checkNetworkConnectivity()){
+            _alertInternet.postValue(true)
+            return
+        }
         _isAuthorizationEnable.value = false
         _isLoading.value = true
         viewModelScope.launch {
@@ -162,5 +170,9 @@ class AuthorizationViewModel @Inject constructor(
         _terminalCode.value = terminalCode
         _amount.value = amount
         _card.value = card
+    }
+
+    fun enableAlertInternet(){
+        _alertInternet.postValue(false)
     }
 }

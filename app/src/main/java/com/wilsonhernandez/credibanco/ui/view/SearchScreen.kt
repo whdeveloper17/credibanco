@@ -21,10 +21,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
@@ -51,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -66,7 +63,7 @@ import com.wilsonhernandez.credibanco.theme.Purple80
 import com.wilsonhernandez.credibanco.ui.viewmodel.SearchViewModel
 import com.wilsonhernandez.credibanco.util.AlertDialogCancel
 import com.wilsonhernandez.credibanco.util.AlertDialogDetail
-import com.wilsonhernandez.credibanco.util.TopAppBarUtil
+import com.wilsonhernandez.credibanco.util.AlertDialogInternet
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -88,6 +85,7 @@ fun SearchScreen(viewModel: SearchViewModel, onclickButtonBack: () -> Unit) {
     }
     val listState: State<List<TransactionsEntity>?> = viewModel.listTransaction.observeAsState()
     val list: List<TransactionsEntity> = listState.value ?: emptyList()
+    val alertInternet: Boolean by viewModel.alertInternet.observeAsState(initial = false)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = {
@@ -134,19 +132,33 @@ fun SearchScreen(viewModel: SearchViewModel, onclickButtonBack: () -> Unit) {
             }
         },
     ) {
-        LazyColumn(modifier = Modifier.padding(top = 65.dp)) {
-            items(list.size) { index ->
-                itemListSearch(item = list[index], onclickCancel = {
-                    viewModel.onCancelAuthorization(list[index])
-                })
+        if (list.isNotEmpty()) {
+            LazyColumn(modifier = Modifier.padding(top = 65.dp)) {
+                items(list.size) { index ->
+                    itemListSearch(item = list[index], onclickCancel = {
+                        viewModel.onCancelAuthorization(list[index])
+                    })
+                }
+            }
+        }else {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Text(
+                    text = "No hay transacción",
+                )
             }
         }
+
 
     }
 
     val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
     BlockingCircularProgress(isLoading)
 
+    if (alertInternet){
+        AlertDialogInternet {
+            viewModel.enableAlertInternet()
+        }
+    }
     if (!snackbar.isNullOrEmpty()){
         scope.launch {
             viewModel.clearSnackbar()
@@ -241,7 +253,6 @@ fun itemListSearch(item: TransactionsEntity, onclickCancel:()->Unit) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBar(
-    modifier: Modifier = Modifier,
     onSearch: (String) -> Unit,
     onClick: () -> Unit,
     onClickClean: () -> Unit

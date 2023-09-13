@@ -27,6 +27,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,18 +65,27 @@ fun ListScreen(viewModel: ListViewModel, onclickButtonBack: () -> Unit) {
             )
         },
     ) {
-           LazyColumn(modifier = Modifier.padding(top = 65.dp)) {
-               items(list.size) { index ->
-                   itemList(item = list[index])
-               }
-           }
+        if (list.isNotEmpty()) {
+            LazyColumn(modifier = Modifier.padding(top = 65.dp)) {
+                items(list.size) { index ->
+                    ItemList(item = list[index])
+                }
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Text(
+                    text = "No hay transacción",
+                )
+            }
+        }
+
 
     }
 
 }
 
 @Composable
-fun itemList(item: TransactionsEntity) {
+fun ItemList(item: TransactionsEntity) {
     val openAlertDialog = remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
@@ -119,5 +129,5 @@ fun itemList(item: TransactionsEntity) {
 fun itemListPreview() {
     val item =
         TransactionsEntity(receiptId = "", rrn = "", statusCode = "", statusDescription = "", commerceCode = "", terminalCode = "")
-    itemList(item)
+    ItemList(item)
 }

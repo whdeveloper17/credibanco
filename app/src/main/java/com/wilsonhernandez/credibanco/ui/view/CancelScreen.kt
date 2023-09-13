@@ -3,6 +3,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,22 +33,23 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wilsonhernandez.credibanco.ui.viewmodel.CancelViewModel
-import com.wilsonhernandez.credibanco.data.database.dao.CrediBancoDao
 import com.wilsonhernandez.credibanco.data.database.entities.TransactionsEntity
 import com.wilsonhernandez.credibanco.theme.Purple40
 import com.wilsonhernandez.credibanco.util.AlertDialogCancel
+import com.wilsonhernandez.credibanco.util.AlertDialogInternet
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CancelScreen(viewModel: CancelViewModel, onclickButtonBack: () -> Unit){
+fun CancelScreen(viewModel: CancelViewModel, onclickButtonBack: () -> Unit) {
     val snackbarHostSate = remember {
         SnackbarHostState()
     }
@@ -56,6 +58,7 @@ fun CancelScreen(viewModel: CancelViewModel, onclickButtonBack: () -> Unit){
     val snackbar: String by viewModel.isSnackbar.observeAsState(initial = "")
     val listState: State<List<TransactionsEntity>?> = viewModel.listAuthorization.observeAsState()
     val list: List<TransactionsEntity> = listState.value ?: emptyList()
+    val alertInternet: Boolean by viewModel.alertInternet.observeAsState(initial = false)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -80,21 +83,31 @@ fun CancelScreen(viewModel: CancelViewModel, onclickButtonBack: () -> Unit){
             SnackbarHost(hostState = snackbarHostSate)
         },
     ) {
-        LazyColumn(modifier = Modifier.padding(top = 65.dp)) {
-
-            list.let {
-                items(it.size) { index ->
-                    itemListCancel(item = list[index]){
+        if (list.isNotEmpty()) {
+            LazyColumn(modifier = Modifier.padding(top = 65.dp)) {
+                items(list.size) { index ->
+                    ItemListCancel(item = list[index]) {
                         viewModel.onCancelAuthorization(list[index])
                     }
                 }
             }
+        } else {
+           Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+               Text(
+                   text = "No hay transacción disponibles para cancelar",
+               )
+           }
         }
     }
     val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
     BlockingCircularProgress(isLoading)
 
-    if (!snackbar.isNullOrEmpty()){
+    if (alertInternet) {
+        AlertDialogInternet {
+            viewModel.enableAlertInternet()
+        }
+    }
+    if (!snackbar.isNullOrEmpty()) {
         scope.launch {
             viewModel.clearSnackbar()
             snackbarHostSate.showSnackbar(message = snackbar)
@@ -103,7 +116,7 @@ fun CancelScreen(viewModel: CancelViewModel, onclickButtonBack: () -> Unit){
 }
 
 @Composable
-fun itemListCancel(item: TransactionsEntity, onclick:()->Unit) {
+fun ItemListCancel(item: TransactionsEntity, onclick: () -> Unit) {
     val openAlertDialog = remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
@@ -132,9 +145,9 @@ fun itemListCancel(item: TransactionsEntity, onclick:()->Unit) {
         }
     }
 
-    if (openAlertDialog.value){
+    if (openAlertDialog.value) {
         AlertDialogCancel {
-            openAlertDialog.value=false
+            openAlertDialog.value = false
             onclick.invoke()
         }
     }
@@ -144,6 +157,13 @@ fun itemListCancel(item: TransactionsEntity, onclick:()->Unit) {
 @Composable
 fun itemListCancelPreview() {
     val item =
-        TransactionsEntity(receiptId = "", rrn = "", statusCode = "", commerceCode = "", terminalCode = "", statusDescription = "")
-    itemList(item)
+        TransactionsEntity(
+            receiptId = "",
+            rrn = "",
+            statusCode = "",
+            commerceCode = "",
+            terminalCode = "",
+            statusDescription = ""
+        )
+    ItemList(item)
 }

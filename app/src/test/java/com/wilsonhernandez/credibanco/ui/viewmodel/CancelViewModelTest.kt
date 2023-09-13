@@ -1,12 +1,12 @@
 package com.wilsonhernandez.credibanco.ui.viewmodel
 
-import android.content.Context
+
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.wilsonhernandez.credibanco.data.database.entities.TransactionsEntity
-import com.wilsonhernandez.credibanco.data.network.response.AuthorizationResponse
 import com.wilsonhernandez.credibanco.data.network.response.CancelResponse
 import com.wilsonhernandez.credibanco.data.repository.DatabaseRepository
 import com.wilsonhernandez.credibanco.domain.CancelUseCase
+import com.wilsonhernandez.credibanco.util.NetworkConnectivity
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.impl.annotations.RelaxedMockK
@@ -31,17 +31,18 @@ class CancelViewModelTest {
     @RelaxedMockK
     private lateinit var cancelUseCase :CancelUseCase
 
-    @RelaxedMockK
-    private lateinit var context: Context
-
     private lateinit var cancelViewModel: CancelViewModel
+
+    @RelaxedMockK
+    private lateinit var networkConnectivity: NetworkConnectivity
+
     @get:Rule
     var rule: InstantTaskExecutorRule = InstantTaskExecutorRule()
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
-        cancelViewModel= CancelViewModel(databaseRepository,cancelUseCase)
+        cancelViewModel= CancelViewModel(databaseRepository,cancelUseCase,networkConnectivity)
         Dispatchers.setMain(Dispatchers.Unconfined)
     }
 
@@ -67,6 +68,8 @@ class CancelViewModelTest {
         val mockTransaction =TransactionsEntity(0,"","","","","","",true)
 
         val successResponse = CancelResponse("00","")
+
+        coEvery { networkConnectivity.checkNetworkConnectivity() } returns true
             coEvery { cancelUseCase(any(), any(), any(), any(), any(), any()) } coAnswers {
                 val successCallback = arg<(CancelResponse) -> Unit>(4)
                 successCallback(successResponse)
@@ -82,7 +85,8 @@ class CancelViewModelTest {
     fun `when onCancelAuthorization is called with error, it should update isSnackbar correctly`() = runTest {
 
         val mockTransaction =TransactionsEntity(0,"","","","","","",true)
-            coEvery { cancelUseCase(any(), any(), any(), any(), any(), any()) } coAnswers {
+        coEvery { networkConnectivity.checkNetworkConnectivity() } returns true
+        coEvery { cancelUseCase(any(), any(), any(), any(), any(), any()) } coAnswers {
                 val errorCallback = arg<() -> Unit>(5)
                 errorCallback()
             }
