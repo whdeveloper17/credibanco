@@ -5,22 +5,22 @@ on:
     branches: ["continuous_integration"]
 
 
-  jobs:
-    build:
-      runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
 
-      steps:
-        - uses: actions/checkout@v3
-        - name: set up JDK 11
-          uses: actions/setup-java@v3
-          with:
-            java-version: '11'
-            distribution: 'temurin'
-            cache: grable
+    steps:
+      - uses: actions/checkout@v3
+      - name: set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: grable
 
 
-        - name: Setup Grable
-          uses: gradle/gradle-build-action@v2
-        - name: Build app
-          run: ./gradlew assemble
+      - name: Setup Grable
+        uses: gradle/gradle-build-action@v2
+      - name: Build app
+        run: ./gradlew assemble
