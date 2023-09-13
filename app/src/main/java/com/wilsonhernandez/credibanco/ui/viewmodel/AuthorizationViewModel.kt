@@ -11,6 +11,8 @@ import androidx.lifecycle.viewModelScope
 import com.wilsonhernandez.credibanco.domain.AuthorizationUseCase
 import com.wilsonhernandez.credibanco.data.database.dao.CrediBancoDao
 import com.wilsonhernandez.credibanco.data.database.entities.TransactionsEntity
+import com.wilsonhernandez.credibanco.data.repository.DatabaseRepository
+import com.wilsonhernandez.credibanco.settings.SettingsUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,8 +21,9 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthorizationViewModel @Inject constructor(
     val context: Context,
-    val dao: CrediBancoDao,
-    val authorizationUseCase: AuthorizationUseCase
+    val databaseRepository: DatabaseRepository,
+    val authorizationUseCase: AuthorizationUseCase,
+    val settingsUtil: SettingsUtil
 ) : ViewModel() {
 
     private val _id = MutableLiveData<String>()
@@ -61,11 +64,7 @@ class AuthorizationViewModel @Inject constructor(
         amount: String,
         card: String
     ) {
-        _id.value = id
-        _commerceCode.value = commerceCode
-        _terminalCode.value = terminalCode
-        _amount.value = amount
-        _card.value = card
+        setValue(id, commerceCode, terminalCode, amount, card)
         _isAuthorizationEnable.value =
             enableAuthorization(id, commerceCode, terminalCode, amount, card)
     }
@@ -77,19 +76,25 @@ class AuthorizationViewModel @Inject constructor(
         amount: String,
         card: String
     ) =
-        id.isNotEmpty() && commerceCode.isNotEmpty() && terminalCode.isNotEmpty() && amount.isNotEmpty() && card.isNotEmpty() && card.length==16
+        id.isNotEmpty() && commerceCode.isNotEmpty() && terminalCode.isNotEmpty() && amount.isNotEmpty() && card.isNotEmpty() && card.length == 16
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun onAuthorization() {
+    fun onAuthorization(
+        id: String,
+        commerceCode: String,
+        terminalCode: String,
+        amount: String,
+        card: String
+    ) {
         _isAuthorizationEnable.value = false
         _isLoading.value = true
         viewModelScope.launch {
             authorizationUseCase(
-                id.value!!,
-                commerceCode.value!!,
-                terminalCode.value!!,
-                amount.value!!,
-                card.value!!,
+                id,
+                commerceCode,
+                terminalCode,
+                amount,
+                card,
                 success = {
                     _isAuthorizationEnable.postValue(true)
                     _isLoading.postValue(false)
@@ -99,16 +104,18 @@ class AuthorizationViewModel @Inject constructor(
                             receiptId = it.receiptId,
                             rrn = it.rrn,
                             statusCode = it.statusCode,
-                            commerceCode = _commerceCode.value!!,
-                            terminalCode = _terminalCode.value!!,
+                            commerceCode = commerceCode,
+                            terminalCode = terminalCode,
                             statusDescription = it.statusDescription
                         )
                         clearFields()
+
                         viewModelScope.launch {
-                            dao.insertTransaction(authorizationEntity)
+                            databaseRepository.setTransaction(authorizationEntity)
                         }
-                        _isAuthorizationEnable.postValue(false)
                         _succesAuthorization.postValue(true)
+                        _isAuthorizationEnable.postValue(false)
+
                     } else {
                         _isSnackbar.postValue("Autorización  erronea")
                         _succesAuthorization.postValue(false)
@@ -119,6 +126,7 @@ class AuthorizationViewModel @Inject constructor(
                     _isAuthorizationEnable.postValue(true)
                     _isLoading.postValue(false)
                     _isSnackbar.postValue("Autorización erronea")
+                    _succesAuthorization.postValue(false)
                 })
         }
     }
@@ -139,7 +147,20 @@ class AuthorizationViewModel @Inject constructor(
     }
 
     fun getInstallationId() {
-         _id.postValue(Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID))
+        _id.postValue(settingsUtil.getAndroidId(context))
     }
 
+    fun setValue(
+        id: String,
+        commerceCode: String,
+        terminalCode: String,
+        amount: String,
+        card: String
+    ) {
+        _id.value = id
+        _commerceCode.value = commerceCode
+        _terminalCode.value = terminalCode
+        _amount.value = amount
+        _card.value = card
+    }
 }

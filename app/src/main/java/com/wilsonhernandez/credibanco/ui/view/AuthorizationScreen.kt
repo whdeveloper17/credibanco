@@ -133,21 +133,30 @@ fun AuthorizationScreen(viewModel: AuthorizationViewModel, onclickButtonBack: ()
             }
             Spacer(modifier = Modifier.height(50.dp))
             ButtonAction(enabled = enable) {
-                viewModel.onAuthorization()
+                viewModel.onAuthorization(
+                    viewModel.id.value!!,
+                    viewModel.commerceCode.value!!,
+                    viewModel.terminalCode.value!!,
+                    viewModel.amount.value!!,
+                    viewModel.card.value!!
+                )
             }
 
             val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
             BlockingCircularProgress(isLoading)
 
-            if (!snackbar.isNullOrEmpty()){
+            if (!snackbar.isNullOrEmpty()) {
                 scope.launch {
                     viewModel.clearSnackbar()
                     snackbarHostSate.showSnackbar(message = snackbar)
                 }
             }
-            if (success){
+            if (success) {
 
-                AlertDialogInformation(title = "Solictud Exitosa", message = "Autorización de una Transacción con exito.") {
+                AlertDialogInformation(
+                    title = "Solictud Exitosa",
+                    message = "Autorización de una Transacción con exito."
+                ) {
                     viewModel.clearSuccesAuthorization()
                     onclickButtonBack.invoke()
                 }
@@ -162,8 +171,8 @@ fun AuthorizationScreen(viewModel: AuthorizationViewModel, onclickButtonBack: ()
 @Preview(showBackground = true)
 @Composable
 fun AuthorizationScreenPreview() {
-    val viewModel : AuthorizationViewModel = viewModel()
-    AuthorizationScreen(viewModel){}
+    val viewModel: AuthorizationViewModel = viewModel()
+    AuthorizationScreen(viewModel) {}
 }
 
 
@@ -501,7 +510,7 @@ fun ButtonAction(enabled: Boolean, onClick: () -> Unit) {
 @Composable
 fun BlockingCircularProgress(isBlocking: Boolean) {
     if (isBlocking) {
-      var isShowingDialog by remember { mutableStateOf(true) }
+        var isShowingDialog by remember { mutableStateOf(true) }
 
         DisposableEffect(isBlocking) {
             onDispose {

@@ -15,6 +15,10 @@ class DatabaseRepository @Inject constructor(val dao: CrediBancoDao) {
             dao.getTransaction()
         }
     }
+
+    suspend fun setTransaction(transactionsEntity: TransactionsEntity){
+        dao.insertTransaction(transactionsEntity)
+    }
     fun getListTransactionsObserver() : Flow<List<TransactionsEntity>> {
         return  dao.getTransactionObserver()
     }

@@ -11,6 +11,8 @@ import com.wilsonhernandez.credibanco.data.database.CrediBancoDatabase
 import com.wilsonhernandez.credibanco.data.network.service.CancelService
 import com.wilsonhernandez.credibanco.data.repository.CancelApiRepository
 import com.wilsonhernandez.credibanco.data.repository.DatabaseRepository
+import com.wilsonhernandez.credibanco.settings.SettingsUtil
+import com.wilsonhernandez.credibanco.settings.SettingsUtilImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -71,5 +73,11 @@ object CrediBancoModule {
     @Singleton
     fun provideCancelRepository(api: CancelService):CancelApiRepository{
         return CancelApiRepository(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSettingUtil():SettingsUtil{
+        return SettingsUtilImpl()
     }
 }
