@@ -86,6 +86,7 @@ fun SearchScreen(viewModel: SearchViewModel, onclickButtonBack: () -> Unit) {
     val listState: State<List<TransactionsEntity>?> = viewModel.listTransaction.observeAsState()
     val list: List<TransactionsEntity> = listState.value ?: emptyList()
     val alertInternet: Boolean by viewModel.alertInternet.observeAsState(initial = false)
+    val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = {
@@ -151,7 +152,7 @@ fun SearchScreen(viewModel: SearchViewModel, onclickButtonBack: () -> Unit) {
 
     }
 
-    val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
+
     BlockingCircularProgress(isLoading)
 
     if (alertInternet){

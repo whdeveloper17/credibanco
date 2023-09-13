@@ -9,7 +9,10 @@ import com.wilsonhernandez.credibanco.core.RetrofitHelper
 import com.wilsonhernandez.credibanco.util.convertBase64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.HttpException
+import retrofit2.Response
 
 class CancelService {
     private val retrofit = RetrofitHelper.getRetrofit()
@@ -31,16 +34,23 @@ class CancelService {
         withContext(Dispatchers.IO){
 
 
-            try {
-                val response= apiService.annulation(auth = auth,cancelRequest).execute()
-                if (response.isSuccessful) {
-                    response.body()?.let { success.invoke(it) }
-                } else {
+            apiService.annulation(auth = auth,cancelRequest).enqueue(object :Callback<CancelResponse>{
+                override fun onResponse(
+                    call: Call<CancelResponse>,
+                    response: Response<CancelResponse>
+                ) {
+                    if (response.body()!=null){
+                        success.invoke(response.body()!!)
+                    }else{
+                        failed.invoke()
+                    }
+                }
+
+                override fun onFailure(call: Call<CancelResponse>, t: Throwable) {
                     failed.invoke()
                 }
-            } catch (e: HttpException) {
-                failed.invoke()
-            }
+
+            })
         }
     }
 }

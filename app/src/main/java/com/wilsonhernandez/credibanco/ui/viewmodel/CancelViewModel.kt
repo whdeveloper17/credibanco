@@ -27,6 +27,8 @@ class CancelViewModel @Inject constructor(private val databaseRepository: Databa
 
     private val _alertInternet = MutableLiveData<Boolean>()
     val alertInternet: LiveData<Boolean> = _alertInternet
+
+
     fun getListStatusApproved() {
         viewModelScope.launch {
             databaseRepository.getListTransactionsApproved().collect {
@@ -41,6 +43,7 @@ class CancelViewModel @Inject constructor(private val databaseRepository: Databa
             _alertInternet.postValue(true)
             return
         }
+        _isLoading.value = true
         viewModelScope.launch {
             cancelUseCase(
                 item.receiptId,
@@ -59,9 +62,10 @@ class CancelViewModel @Inject constructor(private val databaseRepository: Databa
                         _isSnackbar.postValue("Anulacion  erronea")
 
                     }
-
+                    _isLoading.value = false
                 },
                 failed = {
+                    _isLoading.value = false
                     _isSnackbar.postValue("Anulacion erronea")
                 })
         }

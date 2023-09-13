@@ -59,6 +59,7 @@ fun CancelScreen(viewModel: CancelViewModel, onclickButtonBack: () -> Unit) {
     val listState: State<List<TransactionsEntity>?> = viewModel.listAuthorization.observeAsState()
     val list: List<TransactionsEntity> = listState.value ?: emptyList()
     val alertInternet: Boolean by viewModel.alertInternet.observeAsState(initial = false)
+    val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -99,7 +100,7 @@ fun CancelScreen(viewModel: CancelViewModel, onclickButtonBack: () -> Unit) {
            }
         }
     }
-    val isLoading: Boolean by viewModel.isLoading.observeAsState(initial = false)
+
     BlockingCircularProgress(isLoading)
 
     if (alertInternet) {

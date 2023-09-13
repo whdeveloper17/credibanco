@@ -29,6 +29,8 @@ class SearchViewModel @Inject constructor(private val databaseRepository: Databa
 
     private val _alertInternet = MutableLiveData<Boolean>()
     val alertInternet: LiveData<Boolean> = _alertInternet
+
+
     fun  getList(){
         viewModelScope.launch {
             val list= databaseRepository.getListTransactions()
@@ -49,6 +51,7 @@ class SearchViewModel @Inject constructor(private val databaseRepository: Databa
             _alertInternet.postValue(true)
             return
         }
+        _isLoading.postValue(true)
         viewModelScope.launch {
             cancelUseCase(
                 item.receiptId,
@@ -68,10 +71,12 @@ class SearchViewModel @Inject constructor(private val databaseRepository: Databa
                         _isSnackbar.postValue("Anulacion  erronea")
 
                     }
+                    _isLoading.postValue(false)
 
                 },
                 failed = {
                     _isSnackbar.postValue("Anulacion erronea")
+                    _isLoading.postValue(false)
                 })
         }
     }
