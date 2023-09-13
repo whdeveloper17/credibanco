@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
+    id ("com.google.dagger.hilt.android")
 }
 
 android {
@@ -79,6 +80,12 @@ dependencies {
     annotationProcessor ("androidx.room:room-compiler:2.5.0")
 // To use Kotlin annotation processing tool (kapt)
     kapt ("androidx.room:room-compiler:2.5.0")
+
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
+
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+
 
 
 
